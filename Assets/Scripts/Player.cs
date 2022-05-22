@@ -5,42 +5,41 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public float JumpForce;
-
-    [SerializeField]
-    private bool isGrounded = false;
-
+    public static Player Instance;
+    public float jumpForce;
     private Rigidbody2D rb;
-
-    private float score;
-    private bool isAlive = true;
-
-    [SerializeField] private TMP_Text scoreText;
+    public float score;
+    public float bestScore;
+   
+    public bool isGrounded;
+    public bool isAlive;
 
     private void Awake()
     {
+        Instance = this;
+        isAlive = true;
+        isGrounded = false;
         score = 0;
         rb = GetComponent<Rigidbody2D>();
+        bestScore = PlayerPrefs.GetFloat("BestScore"); 
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+    
+        if (isAlive && GameManager.Instance.isGameStarted && !GameManager.Instance.isGamePaused)
         {
-            if (isGrounded == true)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                rb.AddForce(Vector2.up * JumpForce);
-                isGrounded = false;
+                if (isGrounded)
+                {
+                    rb.AddForce(Vector2.up * jumpForce);
+                    isGrounded = false;
+                }
             }
-        }
-
-        if (isAlive)
-        {
             score += Time.deltaTime * 4;
-            scoreText.text = "SCORE: " + Math.Floor(score).ToString();
         }
     }
-
     private void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Ground"))
@@ -49,13 +48,16 @@ public class Player : MonoBehaviour
             {
                 isGrounded = true;
             }
-            
         }
 
         if (col.gameObject.CompareTag("Obstacle"))
         {
             isAlive = false;
-            Time.timeScale = 0;
+            GameManager.Instance.isGameStarted = false;
+            if (bestScore<score)
+            {
+                PlayerPrefs.SetFloat("BestScore", score);
+            }
         }
     }
 }

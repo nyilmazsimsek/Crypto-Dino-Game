@@ -26,8 +26,7 @@ public class ObstacleGenerator : MonoBehaviour
         GameObject obstacleIns = Instantiate(obstacle, transform.position, transform.rotation);
         obstacleIns.GetComponent<ObstacleMovement>().obstacleGenerator = this; 
     }
-
-
+    
     void Update()
     {
         if (currentSpeed < maxSpeed)
